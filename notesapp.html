@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes App</title>
+
+<style>
+/* ========= COLOR SYSTEM ========= */
+:root{
+    /* LIGHT MODE – pastel yellow */
+    --bg:#fff7d6;
+    --sidebar:#fde68a;
+    --editor:#fef3c7;
+    --card:#fffbeb;
+    --panel:#fff1b8;
+
+    --border:#facc15;
+    --text:#78350f;
+    --muted:#92400e;
+
+    --primary:#f59e0b;
+    --accent:#84cc16;
+    --danger:#dc2626;
+}
+
+/* DARK MODE – purple shades */
+body.dark{
+  --bg:#0b0f14;
+  --sidebar:#21252c;
+  --editor:#121823;
+  --card:#161d2a;
+  --panel:#1b2433;
+
+  /* UI LINES & TEXT */
+  --border:#2e3a4d;
+  --text:#eef2f7;
+  --muted:#9eaaba;
+
+  /* ACTION COLORS */
+  --primary:#7aa2ff;   /* calm blue accent */
+  --accent:#8b9bff;    /* lighter hover accent */
+  --danger:#ff6b72;  
+}
+
+/* ========= RESET ========= */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,-apple-system,sans-serif;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+}
+
+/* ========= LAYOUT ========= */
+.app{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    height:100vh;
+}
+
+/* ========= SIDEBAR ========= */
+.sidebar{
+    background:var(--sidebar);
+    padding:22px;
+}
+
+.sidebar h2{
+    font-size:18px;
+    margin-bottom:20px;
+}
+
+/* container where JS will add titles */
+.note-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+/* SIDEBAR TITLE (JS-created) */
+.note-title{
+    padding:12px 14px;
+    border-radius:14px;
+    background:var(--panel);
+    font-size:14px;
+    cursor:pointer;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.note-title:hover{
+    transform:translateX(6px);
+    background:var(--editor);
+    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+}
+
+/* ========= MAIN ========= */
+.main{
+    display:grid;
+    grid-template-rows:auto 1.6fr 1fr;
+    padding:22px;
+    gap:18px;
+}
+
+/* ========= TOPBAR ========= */
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.topbar button{
+    border:none;
+    background:var(--panel);
+    padding:7px 16px;
+    border-radius:999px;
+    color:var(--text);
+    cursor: pointer;
+}
+
+/* ========= EDITOR ========= */
+#editor{
+    background:var(--editor);
+    border-radius:28px;
+    padding:26px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+}
+
+#editor h3{
+    font-size:18px;
+    margin-bottom:14px;
+}
+
+#titleInput{
+    border:none;
+    border-bottom:2px solid var(--primary);
+    padding:10px 0;
+    margin-bottom:16px;
+    outline:none;
+    background:transparent;
+    color:var(--text);
+}
+
+#noteInput{
+    flex:1;
+    border:none;
+    resize:none;
+    font-size:14px;
+    outline:none;
+    background:transparent;
+    color:var(--text);
+}
+
+/* ADD BUTTON */
+#addBtn{
+    position:absolute;
+    bottom:20px;
+    right:20px;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:12px 22px;
+    border-radius:999px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.25);
+}
+
+/* ========= NOTES GRID ========= */
+#notesGrid{
+    position:relative;
+    height:220px;
+}
+
+/*
+  NOTE CARD (JS-created)
+  JS should set: style="--i:0" , --i:1 , --i:2 ...
+*/
+.note-card{
+    --i:0;
+    position:absolute;
+    left:calc(var(--i) * 240px);
+    width:220px;
+    height:160px;
+    background:var(--card);
+    border-radius:22px;
+    padding:16px;
+    padding-bottom:56px;   /* reserve space */
+    overflow:hidden;
+    transition:
+        width 0.45s cubic-bezier(.22,1,.36,1),
+        height 0.45s cubic-bezier(.22,1,.36,1),
+        transform 0.45s cubic-bezier(.22,1,.36,1),
+        box-shadow 0.45s cubic-bezier(.22,1,.36,1);
+}
+
+.note-card:hover{
+    width:360px;
+    height:270px;
+    overflow:auto;
+    transform:translateY(-55px);
+    box-shadow:0 45px 90px rgba(0,0,0,0.35);
+    z-index:10;
+}
+
+.note-card p{
+    max-height: 90px;        /* normal state */
+    overflow: hidden;
+    line-height: 1.45;
+    word-break: break-word;
+    z-index: -1;
+}
+
+.note-card:hover p{
+    max-height: 160px;       /* expands on hover */
+    overflow-y: auto;
+}
+
+
+.note-actions{
+    position:absolute;
+    bottom:16px;
+    left:16px;
+    right:16px;
+    z-index: 2;              /* stays above text */
+}
+
+.note-card{
+    padding-bottom: 64px;   /* reserve button space */
+}
+
+
+.note-card p::-webkit-scrollbar{
+    width:6px;
+}
+
+.note-card p::-webkit-scrollbar-thumb{
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+}
+
+body.dark .note-card p::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,0.25);
+}
+
+
+
+.note-actions .edit{
+    background:rgba(132,204,22,0.25);
+    color:var(--accent);
+}
+
+.note-actions .remove{
+    background:rgba(220,38,38,0.25);
+    color:var(--danger);
+}
+
+.note-actions button{
+    border:none;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:12px;
+    cursor:pointer;
+    z-index:1;
+}
+#msg{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    display: none;
+}
+
+#msg:not(:empty){
+    display: block;
+}
+
+
+/* overlay box */
+.box{
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: 660px;
+    max-width: 90%;
+    height: 520px;
+    background: var(--card);
+    border-radius: 22px;
+    padding: 20px;
+    z-index: 9999;
+
+    box-shadow: 
+        0 30px 80px rgba(0,0,0,0.35);
+
+    animation: popup 0.35s ease;
+}
+
+/* box title */
+.box h3{
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 6px;
+}
+
+/* box note text */
+.box p{
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+    overflow-y: auto;
+    max-height: 440px;
+    padding-right: 6px;
+}
+
+/* smooth scrollbar (optional but clean) */
+.box p::-webkit-scrollbar{
+    width: 6px;
+}
+.box p::-webkit-scrollbar-thumb{
+    background: var(--border);
+    border-radius: 10px;
+}
+
+
+/* close (cut) button */
+.cut{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--danger);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* hover feedback */
+.cut:hover{
+    transform: scale(1.08);
+}
+
+/* popup animation */
+@keyframes popup{
+    from{
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+    to{
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+
+
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Notes App</h2>
+        <div class="note-list"></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <div class="topbar">
+            <h1>NOTES APP</h1>
+            <button id="light">dark mode</button>
+        </div>
+
+        <!-- EDITOR -->
+        <section id="editor">
+            <h3>Title:</h3>
+            <input id="titleInput" type="text" placeholder="Enter title">
+            <textarea id="noteInput" placeholder="Write your notes here..."></textarea>
+            <button id="addBtn">Add Note</button>
+        </section>
+
+        <!-- NOTES (JS will inject note-card divs here) -->
+        <section id="notesGrid"></section>
+<p id="msg"></p>
+
+
+    </main>
+</div>
+</body>
+<script>
+let light = document.getElementById("light");
+let title  = document.getElementById("titleInput");
+let note  = document.getElementById("noteInput");
+let addbtn  = document.getElementById("addBtn");
+let notelist = document.querySelector(".note-list");
+let notesgrid = document.getElementById("notesGrid");
+let app = document.querySelector(".app")
+let msg = document.getElementById("msg");
+
+/* load notes from localStorage */
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+
+/* restore notes on page load */
+notes.forEach((item, index) => {
+    createNote(item, index);
+});
+
+light.addEventListener("click", function () {
+    document.body.classList.toggle("dark");
+    light.innerText = document.body.classList.contains("dark")
+        ? "light mode"
+        : "dark mode";
+});
+
+addbtn.addEventListener("click", function () {
+
+    if (title.value.trim() === "") {
+        msg.innerText = "Add your Title";
+        setTimeout(() => msg.innerText = "", 2000);
+        return;
+    }
+
+    if (note.value.trim() === "") {
+        msg.innerText = "Add your note";
+        setTimeout(() => msg.innerText = "", 2000);
+        return;
+    }
+
+    /* save note */
+    let noteObj = {
+        title: title.value,
+        note: note.value
+    };
+
+    notes.push(noteObj);
+    localStorage.setItem("notes", JSON.stringify(notes));
+
+    /* create UI for only this note */
+    createNote(noteObj, notes.length - 1);
+
+    title.value = "";
+    note.value = "";
+});
+
+/* SAME STRUCTURE AS YOU USED — JUST FIXED */
+function createNote(item, index) {
+
+    let notetitle = document.createElement("div");
+    notetitle.classList.add("note-title");
+    notetitle.innerText = item.title;
+    notelist.appendChild(notetitle);
+
+    let notecard = document.createElement("div");
+    notecard.classList.add("note-card");
+    notecard.style.setProperty("--i", index);
+
+    let h4 = document.createElement("h4");
+    h4.innerText = item.title;
+
+    let p = document.createElement("p");
+    p.innerText = item.note;
+
+    let noteaction = document.createElement("div");
+    noteaction.classList.add("note-actions");
+
+    let remove = document.createElement("button");
+    remove.classList.add("remove");
+    remove.innerText = "Remove";
+
+    remove.addEventListener("click", function () {
+        notecard.remove();
+        notetitle.remove();
+
+        notes = notes.filter(n => n !== item);
+        localStorage.setItem("notes", JSON.stringify(notes));
+    });
+
+    noteaction.appendChild(remove);
+
+    notecard.appendChild(h4);
+    notecard.appendChild(p);
+    notecard.appendChild(noteaction);
+
+    notesgrid.appendChild(notecard);
+
+    notetitle.addEventListener("click", ()=>{
+        if(document.querySelector(".box")) return;
+
+        let box =  document.createElement("div");
+        box.classList.add("box");
+        let boxTitle = document.createElement("h3");
+        boxTitle.innerText = item.title;
+
+        let boxNote = document.createElement("p");
+        boxNote.innerText = item.note;
+
+        let cut = document.createElement("button");
+        cut.classList.add("cut")
+        cut.innerText = "X"
+
+        document.body.appendChild(box)
+        box.appendChild(cut)
+        box.appendChild(boxTitle);
+        box.appendChild(boxNote);
+        app.style.filter =" blur(2px)";
+
+
+        
+        cut.addEventListener("click", ()=>{
+        box.remove();
+        app.style.filter =" none";
+
+       })
+        
+    });
+    
+}
+</script>
+
+</html>
+ 

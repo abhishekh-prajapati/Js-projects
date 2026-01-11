@@ -1,0 +1,51 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <button id="load">Load Notes</button>
+        <p id="status"></p>
+        <ul id="list"></ul>
+    </body>
+    <script>
+        const loadbtn = document.getElementById("load");
+        const status = document.getElementById("status");
+        const list = document.getElementById("list");
+
+        function fetchNotes() {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+            resolve([
+                "Learn JavaScript",
+                "Understand async / await",
+                "Build real projects",
+            ]);
+            },2000);
+        });
+        }
+
+        async function loadNotes(){
+            status.innerText = "Loading...";
+            list.innerHTML = "";
+            
+            try{
+                const notes = await fetchNotes()
+                status.innerText = "Loaded";
+
+                notes.forEach(note => {
+                        const li = document.createElement("li");
+                        li.innerText = note;
+                        list.appendChild(li);
+                });
+            }
+            catch (error) {
+                status.innerText = "failed to load notes"
+            }
+        }
+
+        loadbtn.addEventListener("click", loadNotes);
+    </script>
+    </html>

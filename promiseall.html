@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="load">Load Data</button>
+<p id="status"></p>
+<ul id="list"></ul>
+
+</body>
+<script>
+    
+    
+    const loadBtn = document.getElementById("load");
+    const status = document.getElementById("status");
+    const list = document.getElementById("list");
+    
+    function fetchNotes() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(["Learn JavaScript", "Async Await"]);
+        }, 2000);
+      });
+    }
+    
+    function fetchTasks() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(["Practice daily", "Build project"]);
+        }, 1500);
+      });
+    }
+    
+    async function loadData() {
+      status.innerText = "Loading...";
+      list.innerHTML = "";
+    
+      try {
+        const [notes, tasks] = await Promise.all([
+          fetchNotes(),
+          fetchTasks()
+        ]);
+    
+        status.innerText = "Loaded";
+    
+        notes.forEach(item => {
+          const li = document.createElement("li");
+          li.innerText = "Note: " + item;
+          list.appendChild(li);
+        });
+    
+        tasks.forEach(item => {
+          const li = document.createElement("li");
+          li.innerText = "Task: " + item;
+          list.appendChild(li);
+        });
+    
+      } catch (error) {
+        status.innerText = "Failed to load data";
+      }
+    }
+    
+    loadBtn.addEventListener("click", loadData);
+</script>
+</html>

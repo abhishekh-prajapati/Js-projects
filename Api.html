@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    #userInfo{
+        width: 300px;
+        height: 200px;
+        border: 1px solid black;
+        padding: 10px;
+        margin: 20px auto;
+        text-align: center;
+    }
+</style>
+<body>
+    <div id="userInfo"></div>
+
+</body>
+<script>
+    let userinfo = document.getElementById("userInfo");
+
+    async function getUser(){
+        let res = await fetch("https://jsonplaceholder.typicode.com/users/1");
+        let data = await response.json();
+
+        userinfo.innerHTML = `  
+        <h2>${data.name}</h2>
+        <p>${data.email}</p>
+        <p>${data.phone}</p>
+        `
+    };
+
+getUser</script>
+</html>

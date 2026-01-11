@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+    *{
+        margin: 10px;padding: 10px;
+    }
+    body{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height:100vh;
+    }
+    #togglebtn {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 10px;
+        background-color:rgba(171, 171, 237, 1);
+        color: white;
+        
+    }
+</style>
+<body>
+    <button id="togglebtn">Darkmode</button>
+</body>
+<script>
+let togglebtn = document.getElementById("togglebtn");
+let darkmode = false;
+
+togglebtn.addEventListener("click", function(){
+ if(darkmode === false) {
+document.body.style.backgroundColor = "rgba(34, 34, 57, 1)";
+document.body.style.color = "white";
+togglebtn.innerText = "light mode";
+darkmode = true;
+} else {
+document.body.style.backgroundColor = "white";
+document.body.style.color = "black";
+togglebtn.innerText = "Darkbutton";
+darkmode = false;
+}});
+</script>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice</title>
+    <style>
+
+        body{
+            display:flex;
+            justify-content: center;
+            align-content: center;
+           background-color: #000000ff;
+            color: white;
+        }
+#name{
+    padding: 20px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50%;
+}
+
+    </style>
+</head>
+<body>
+    <input type="text" placeholder="Enter you Name" id="name" />
+    <button id="submit">Submit</button>
+    <p id="result"></p>
+</body>
+<script>
+    const name = document.getElementById("name");
+    const submit = document.getElementById("submit");
+    const output = document.getElementById("result");
+
+    submit.addEventListener("click", ()=>{
+        output.innerText = name.value;
+        localStorage.setItem("thisname",JSON.stringify(name.value));
+        loaction.reload();
+    })
+    window.addEventListener("load",()=>{
+        output.innerText = name.value;
+        let saved = JSON.parse(localStorage.getItem("thisname"));
+        if (saved !== null){
+            output.innerText = saved;
+        }
+    })
+
+</script>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Demo</title>
+</head>
+<body>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button id="loginBtn">Login</button>
+
+<p id="status"></p>
+  <script>
+let username = document.getElementById("username");
+let password = document.getElementById("password");
+let login = document.getElementById("loginBtn");
+let status = document.getElementById("status");
+
+login.addEventListener("click", function(){
+    const usernameinput = username.value;
+    const passwordinput = password.value;
+    console.log(usernameinput);
+    console.log(passwordinput);
+})
+  </script>
+</body>
+</html>

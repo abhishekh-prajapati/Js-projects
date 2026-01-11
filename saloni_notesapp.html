@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes App</title>
+  <style>
+    /* ========= COLOR SYSTEM ========= */
+:root {
+  --bg: #fff7d6;
+  --sidebar: #fde68a;
+  --editor: #fef3c7;
+  --card: #fffbeb;
+  --panel: #fff1b8;
+
+  --border: #facc15;
+  --text: #78350f;
+  --muted: #92400e;
+
+  --primary: #f59e0b;
+  --accent: #84cc16;
+  --danger: #dc2626;
+}
+
+/* DARK MODE */
+body.dark {
+  --bg: #1a1025;
+  --sidebar: #241332;
+  --editor: #2d1448;
+  --card: #33194f;
+  --panel: #3b1d5f;
+
+  --border: #6d28d9;
+  --text: #f3e8ff;
+  --muted: #d8b4fe;
+
+  --primary: #a78bfa;
+  --accent: #c4b5fd;
+  --danger: #fb7185;
+}
+
+/* ========= RESET ========= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ========= LAYOUT ========= */
+.app {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ========= SIDEBAR ========= */
+.sidebar {
+  background: var(--sidebar);
+  padding: 22px;
+}
+
+.sidebar h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ========= MAIN ========= */
+.main {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  padding: 22px;
+  gap: 18px;
+}
+
+/* ========= TOPBAR ========= */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar button {
+  border: none;
+  background: var(--panel);
+  padding: 7px 16px;
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* ========= EDITOR ========= */
+#editor {
+  background: var(--editor);
+  border-radius: 28px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#editor h3 {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+#titleInput {
+  border: none;
+  border-bottom: 2px solid var(--primary);
+  padding: 10px 0;
+  margin-bottom: 16px;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+}
+
+#noteInput {
+  border: none;
+  resize: none;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  min-height: 90px;
+}
+
+/* ADD BUTTON */
+#addBtn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* ========= NOTES GRID ========= */
+#notesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+/* ========= NOTE CARD ========= */
+.note-card {
+  background: var(--primary);
+  border-radius: 22px;
+  padding: 16px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.note-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+}
+
+.note-card h4 {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.note-card p {
+  font-size: 13px;
+  color: black;
+  flex: 1;
+}
+
+/* ========= ACTION BUTTONS ========= */
+.note-card button {
+  align-self: flex-start;
+}
+
+/* EDIT */
+.edit {
+  margin-right: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #c7d2fe;
+  background: linear-gradient(135deg, #e0e7ff, #f0f9ff);
+  color: #3730a3;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* DELETE */
+.delete {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #fecaca;
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #b91c1c;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.note-actions {
+  display: flex;
+  gap: 8px;
+}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <h2>Notes App</h2>
+      <div class="note-list"></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <div class="topbar">
+        <h1>NOTES APP</h1>
+        <button id="dark">dark mode</button>
+      </div>
+
+      <!-- EDITOR -->
+      <section id="editor">
+        <h3>Title:</h3>
+        <input id="titleInput" type="text" placeholder="Enter title">
+        <textarea id="noteInput" placeholder="Write your notes here..."></textarea>
+        <button id="addBtn">Add Note</button>
+      </section>
+
+      <!-- NOTES (JS will inject note-card divs here) -->
+      <section id="notesGrid"></section>
+    </main>
+  </div>
+</body>
+
+<script>
+  let dark = document.getElementById("dark");
+  let titleInput = document.getElementById("titleInput");
+  let noteInput = document.getElementById("noteInput");
+  let addBtn = document.getElementById("addBtn");
+  let notesGrid = document.getElementById("notesGrid");
+
+  /* ---------- DARK MODE ---------- */
+  let isDark = JSON.parse(localStorage.getItem("dark"));
+  if (isDark) {
+    document.body.classList.add("dark");
+  }
+
+  dark.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem(
+      "dark",
+      JSON.stringify(document.body.classList.contains("dark"))
+    );
+  });
+
+  /* ---------- NOTES ---------- */
+  let notes = JSON.parse(localStorage.getItem("notes")) || [];
+  notes.forEach(item => {
+    createNote(item.title, item.text);
+  });
+
+  addBtn.addEventListener("click", () => {
+    let title = titleInput.value;
+    let note = noteInput.value;
+
+    if (note === "") {
+      alert("please write your notes");
+      return;
+    }
+
+    let noteObj = {
+      title: title || "untitled",
+      text: note
+    };
+
+    notes.push(noteObj);
+    localStorage.setItem("notes", JSON.stringify(notes));
+
+    createNote(noteObj.title, noteObj.text);
+   
+    titleInput.value = "";
+    noteInput.value = "";
+  });
+
+  /* ---------- CREATE NOTE CARD ---------- */
+  function createNote(title, note) {
+    let noteCard = document.createElement("div");
+    noteCard.classList.add("note-card");
+
+    let h4 = document.createElement("h4");
+    h4.innerText = title;
+
+    let p = document.createElement("p");
+    p.innerText = note;
+
+    let noteAction = document.createElement("div");
+    noteAction.classList.add("note-actions");
+
+    let edit = document.createElement("button");
+    edit.classList.add("edit");
+    edit.innerText = "Edit";
+
+    let del = document.createElement("button");
+    del.classList.add("delete");
+    del.innerText = "Delete";
+
+    del.addEventListener("click", () => {
+      notes = notes.filter(n => n.text !== note);
+      localStorage.setItem("notes", JSON.stringify(notes));
+      noteCard.remove();
+    });
+
+    noteAction.appendChild(edit);
+    noteAction.appendChild(del);
+
+    noteCard.appendChild(h4);
+    noteCard.appendChild(p);
+    noteCard.appendChild(noteAction);
+
+    notesGrid.appendChild(noteCard);
+  }
+
+</script>
+
+</html>

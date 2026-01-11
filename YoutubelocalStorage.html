@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Hey There , My name is <span id="change-name">Abhishekh prajapati</span></h2>
+   <input id="username" type="text" placeholder="Enter your name">
+    <button id="Clickbutton">Click Me</button>
+</body>
+<script>
+    const button = document.getElementById("Clickbutton");
+    const uname = document.getElementById("username");
+    const change = document.getElementById("change-name");
+
+    button.addEventListener('click', () => {
+        const value = uname.value;
+        localStorage.setItem("name", value);
+        location.reload();
+    });
+    window.addEventListener('load', () =>{
+        const value = localStorage.getItem('name');
+        change.innerText = value;
+    })
+</script>
+</html>

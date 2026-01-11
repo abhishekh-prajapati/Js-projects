@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    function success(num) {
+      return new Promise(resolve =>{
+        setTimeout(() => resolve(num), 1000);
+      });
+    }
+
+    function fail() {
+      return new Promise((_, reject) =>{
+        setTimeout(() => reject("Error happened"), 500);
+      });
+    }
+    async function run() {
+      try{
+        const result = await Promise.allSettled([
+          success(1),
+          fail(),
+          success(3)
+        ]);
+        console.log(result);
+      }catch (err){
+        console.log("caught", err);
+      }
+    }
+    run();
+  </script>
+</html>
